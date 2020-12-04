@@ -9,28 +9,28 @@ import (
 	"strings"
 )
 
-type PasswordKey string
+type passportKey string
 
 const (
-	BirthYear      PasswordKey = "byr"
-	IssueYear                  = "iyr"
-	ExpirationYear             = "eyr"
-	Height                     = "hgt"
-	HairColor                  = "hcl"
-	EyeColor                   = "ecl"
-	PassportID                 = "pid"
-	CountryID                  = "cid"
+	birthYear      passportKey = "byr"
+	issueYear                  = "iyr"
+	expirationYear             = "eyr"
+	height                     = "hgt"
+	hairColor                  = "hcl"
+	eyeColor                   = "ecl"
+	passportID                 = "pid"
+	countryID                  = "cid"
 )
 
-var requiredKeys = [...]PasswordKey{
-	BirthYear,
-	IssueYear,
-	ExpirationYear,
-	Height,
-	HairColor,
-	EyeColor,
-	PassportID,
-	// "CountryID",
+var requiredKeys = [...]passportKey{
+	birthYear,
+	issueYear,
+	expirationYear,
+	height,
+	hairColor,
+	eyeColor,
+	passportID,
+	// countryID,
 }
 
 func check(e error) {
@@ -53,45 +53,45 @@ func loadFileContent(filename string) string {
 	return string(data)
 }
 
-func createPasswordMap(passwordRaw string) map[PasswordKey]string {
-	password := map[PasswordKey]string{}
+func createPassportMap(passportRaw string) map[passportKey]string {
+	passport := map[passportKey]string{}
 
-	keyValues := strings.Fields(passwordRaw)
+	keyValues := strings.Fields(passportRaw)
 
 	for _, keyValue := range keyValues {
 		split := strings.Split(keyValue, ":")
 		checkIndexArray(split, 1)
-		password[PasswordKey(split[0])] = split[1]
+		passport[passportKey(split[0])] = split[1]
 	}
 
-	return password
+	return passport
 }
 
-func transformToPasswordMap(passwordsRaw []string) []map[PasswordKey]string {
-	var passwords []map[PasswordKey]string
+func transformToPassportMap(passportsRaw []string) []map[passportKey]string {
+	var passports []map[passportKey]string
 
-	for _, str := range passwordsRaw {
+	for _, str := range passportsRaw {
 		if str == "" {
 			continue
 		}
 
-		password := createPasswordMap(str)
-		passwords = append(passwords, password)
+		passport := createPassportMap(str)
+		passports = append(passports, passport)
 	}
 
-	return passwords
+	return passports
 }
 
-func prepareData() []map[PasswordKey]string {
+func prepareData() []map[passportKey]string {
 	data := loadFileContent("input.txt")
-	passwordsRaw := strings.Split(data, "\n\n")
+	passportsRaw := strings.Split(data, "\n\n")
 
-	return transformToPasswordMap(passwordsRaw)
+	return transformToPassportMap(passportsRaw)
 }
 
-func isPasswordValid(password map[PasswordKey]string) bool {
+func isPassportValid(passport map[passportKey]string) bool {
 	for _, key := range requiredKeys {
-		if _, ok := password[key]; !ok {
+		if _, ok := passport[key]; !ok {
 			return false
 		}
 	}
@@ -99,11 +99,11 @@ func isPasswordValid(password map[PasswordKey]string) bool {
 	return true
 }
 
-func getValidPasswordsCount(passwords []map[PasswordKey]string) int {
+func getValidPassportsCount(passports []map[passportKey]string) int {
 	count := 0
 
-	for _, password := range passwords {
-		if isPasswordValid(password) {
+	for _, passport := range passports {
+		if isPassportValid(passport) {
 			count = count + 1
 		}
 	}
@@ -111,24 +111,24 @@ func getValidPasswordsCount(passwords []map[PasswordKey]string) int {
 	return count
 }
 
-func isPasswordValidString(password map[PasswordKey]string) bool {
-	if !isPasswordValid(password) {
+func isPassportValidString(passport map[passportKey]string) bool {
+	if !isPassportValid(passport) {
 		return false
 	}
 
-	birthday, error := strconv.Atoi(password[BirthYear])
+	birthday, error := strconv.Atoi(passport[birthYear])
 	check(error)
 	if birthday < 1920 || birthday > 2002 {
 		return false
 	}
 
-	issue, error := strconv.Atoi(password[IssueYear])
+	issue, error := strconv.Atoi(passport[issueYear])
 	check(error)
 	if issue < 2010 || issue > 2020 {
 		return false
 	}
 
-	expiration, error := strconv.Atoi(password[ExpirationYear])
+	expiration, error := strconv.Atoi(passport[expirationYear])
 	check(error)
 	if expiration < 2020 || expiration > 2030 {
 		return false
@@ -136,11 +136,11 @@ func isPasswordValidString(password map[PasswordKey]string) bool {
 
 	heightReg, error := regexp.Compile(`^(\d+)(cm|in)$`)
 	check(error)
-	height := heightReg.MatchString(password[Height])
-	if !height {
+	heightCorrect := heightReg.MatchString(passport[height])
+	if !heightCorrect {
 		return false
 	}
-	groups := heightReg.FindStringSubmatch(password[Height])
+	groups := heightReg.FindStringSubmatch(passport[height])
 	if groups[2] == "cm" {
 		size, error := strconv.Atoi(groups[1])
 		check(error)
@@ -157,19 +157,19 @@ func isPasswordValidString(password map[PasswordKey]string) bool {
 		}
 	}
 
-	hair, error := regexp.MatchString(`^#[0-9a-f]{6}$`, password[HairColor])
+	hair, error := regexp.MatchString(`^#[0-9a-f]{6}$`, passport[hairColor])
 	check(error)
 	if !hair {
 		return false
 	}
 
-	eye, error := regexp.MatchString(`^(amb|blu|brn|gry|grn|hzl|oth)$`, password[EyeColor])
+	eye, error := regexp.MatchString(`^(amb|blu|brn|gry|grn|hzl|oth)$`, passport[eyeColor])
 	check(error)
 	if !eye {
 		return false
 	}
 
-	id, error := regexp.MatchString(`^\d{9}$`, password[PassportID])
+	id, error := regexp.MatchString(`^\d{9}$`, passport[passportID])
 	check(error)
 	if !id {
 		return false
@@ -178,11 +178,11 @@ func isPasswordValidString(password map[PasswordKey]string) bool {
 	return true
 }
 
-func getValidPasswordsCountStrinct(passwords []map[PasswordKey]string) int {
+func getValidPassportsCountStrinct(passports []map[passportKey]string) int {
 	count := 0
 
-	for _, password := range passwords {
-		if isPasswordValidString(password) {
+	for _, passport := range passports {
+		if isPassportValidString(passport) {
 			count = count + 1
 		}
 	}
@@ -191,8 +191,8 @@ func getValidPasswordsCountStrinct(passwords []map[PasswordKey]string) int {
 }
 
 func main() {
-	passwords := prepareData()
+	passports := prepareData()
 
-	fmt.Println(getValidPasswordsCount(passwords))
-	fmt.Println(getValidPasswordsCountStrinct(passwords))
+	fmt.Println("number of passports with all required fields", getValidPassportsCount(passports))
+	fmt.Println("valid passports", getValidPassportsCountStrinct(passports))
 }

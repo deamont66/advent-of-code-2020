@@ -8,15 +8,15 @@ import (
 	"strings"
 )
 
-type PasswordPolicy struct {
+type passwordPolicy struct {
 	letter byte
 	min    int
 	max    int
 }
 
-type Password struct {
+type password struct {
 	value  string
-	policy PasswordPolicy
+	policy passwordPolicy
 }
 
 func check(e error) {
@@ -46,7 +46,7 @@ func loadFileContent(filename string) string {
 	return string(data)
 }
 
-func createPassword(line string) Password {
+func createPassword(line string) password {
 	data := strings.Split(line, ":")
 	checkIndexArray(data, 0)
 	policyData := strings.Split(data[0], " ")
@@ -64,14 +64,14 @@ func createPassword(line string) Password {
 	checkIndexArray(data, 1)
 	passwordValue := strings.TrimSpace(data[1])
 
-	policy := PasswordPolicy{letter: policyLetter, min: policyMin, max: policyMax}
-	password := Password{value: passwordValue, policy: policy}
+	policy := passwordPolicy{letter: policyLetter, min: policyMin, max: policyMax}
+	password := password{value: passwordValue, policy: policy}
 
 	return password
 }
 
-func transformToPasswords(lines []string) []Password {
-	var data []Password
+func transformToPasswords(lines []string) []password {
+	var data []password
 
 	for _, str := range lines {
 		if str == "" {
@@ -85,20 +85,20 @@ func transformToPasswords(lines []string) []Password {
 	return data
 }
 
-func prepareData() []Password {
+func prepareData() []password {
 	data := loadFileContent("input.txt")
 	lines := strings.Split(data, "\n")
 
 	return transformToPasswords(lines)
 }
 
-func isValidOld(password Password) bool {
+func isValidOld(password password) bool {
 	count := strings.Count(password.value, string(password.policy.letter))
 
 	return password.policy.min <= count && count <= password.policy.max
 }
 
-func countOldValidPasswords(passwords []Password) int {
+func countOldValidPasswords(passwords []password) int {
 	var count int = 0
 	for _, password := range passwords {
 		if isValidOld(password) {
@@ -109,14 +109,14 @@ func countOldValidPasswords(passwords []Password) int {
 	return count
 }
 
-func isValidNew(password Password) bool {
+func isValidNew(password password) bool {
 	isFirst := password.value[password.policy.min-1] == password.policy.letter
 	isSecond := password.value[password.policy.max-1] == password.policy.letter
 
 	return isFirst != isSecond
 }
 
-func countNewValidPasswords(passwords []Password) int {
+func countNewValidPasswords(passwords []password) int {
 	var count int = 0
 	for _, password := range passwords {
 		if isValidNew(password) {
